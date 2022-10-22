@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import './style/App.css'
 
 function App() {
 
@@ -21,7 +22,13 @@ function App() {
 
     const data = await response.json()
 
-    console.log(data)
+    if(data.user){
+      localStorage.setItem('token', data.user)
+      alert('Login Successful')
+      window.location.href =  '/canvas'
+    }else{
+      alert('Please check your username and password!')
+    }
 
     if (data.status === 'ok'){
       //history.push('/login')
@@ -29,26 +36,36 @@ function App() {
   }
 
   return(
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={loginUser}>
-        <input
-          value  = {email}
-          onChange = {(e) => setEmail(e.target.value)}
-          type = "email"
-          placeholder = "Email"        
-        />
-        <br/>
-        <input
-          value = {password}
-          onChange = {(e) => setPassword(e.target.value)}
-          type = "password"
-          placeholder = "Password"
-        />
-        <br/>
-        <input type = "submit" value = "Login" />
-      </form>
+    <div className='main'>
+      <div className='sub-main'>
+        <h1>Log in to continue</h1>
+        <form onSubmit={loginUser}>
+          <input
+            className='input-box'
+            value  = {email}
+            onChange = {(e) => setEmail(e.target.value)}
+            type = "email"
+            placeholder = "Email"        
+          />
+          <br/><br/>
+          <input
+            className='input-box'
+            value = {password}
+            onChange = {(e) => setPassword(e.target.value)}
+            type = "password"
+            placeholder = "Password"
+          />
+          <br/><br/>
+          <a className='a-link' href="/forgotpassword">Forgot password?</a>
+          <br/><br/>
+          <button type='submit' value = 'Login'>Log in</button>
+          <br/><br/>
+          <a>Don't have an account?</a> <a className='a-link' href="/signup">Sign up</a>
+          <p>or</p>
+        </form>
+      </div>
     </div>
+
   )
 }
 

@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import './style/App.css'
 
 function App() {
 
-  const [name, setName ] = useState('')
+  const [firstname, setFirstName ] = useState('')
+  const [lastname, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -15,7 +17,8 @@ function App() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name,
+        firstname,
+        lastname,
         email,
         password,
       }),
@@ -26,37 +29,52 @@ function App() {
     console.log(data)
 
     if (data.status === 'ok'){
-      //history.push('/login')
+      window.location.href =  '/canvas'
+    }else{
+      alert('Duplicate Email')
     }
   }
 
   return(
-    <div>
-      <h1>Sign up</h1>
-      <form onSubmit={signUp}>
-        <input 
-          value = {name}
-          onChange = {(e) => setName(e.target.value)}
-          type = "text"
-          placeholder = "Name" 
-        />
-        <br/>
-        <input
-          value  = {email}
-          onChange = {(e) => setEmail(e.target.value)}
-          type = "email"
-          placeholder = "Email"        
-        />
-        <br/>
-        <input
-          value = {password}
-          onChange = {(e) => setPassword(e.target.value)}
-          type = "password"
-          placeholder = "Password"
-        />
-        <br/>
-        <input type = "submit" value = "Sign Up" />
-      </form>
+    <div className='main'>
+      <div className='sub-main'>
+        <h1>Sign up</h1>
+        <form onSubmit={signUp}>
+          <input
+            className='input-box'
+            value = {firstname}
+            onChange = {(e) => setFirstName(e.target.value)}
+            type = "text"
+            placeholder = "Firstname" 
+          />
+          <br/><br/>
+          <input
+            className='input-box'
+            value = {lastname}
+            onChange = {(e) => setLastName(e.target.value)}
+            type = "text"
+            placeholder = "Lastname" 
+          />
+          <br/><br/>
+          <input
+            className='input-box'
+            value  = {email}
+            onChange = {(e) => setEmail(e.target.value)}
+            type = "email"
+            placeholder = "Email"        
+          />
+          <br/><br/>
+          <input
+            className='input-box'
+            value = {password}
+            onChange = {(e) => setPassword(e.target.value)}
+            type = "password"
+            placeholder = "Password"
+          />
+          <br/><br/>
+          <button type='submit' value = 'Signup'>Sign Up</button>
+        </form>
+      </div>
     </div>
   )
 }
