@@ -29,7 +29,7 @@ function App() {
     console.log(data)
 
     if (data.status === 'ok'){
-      window.location.href =  '/canvas'
+      window.location.href =  '/'
     }else{
       alert('Duplicate Email')
     }

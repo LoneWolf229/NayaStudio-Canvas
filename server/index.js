@@ -11,7 +11,6 @@ app.use(express.json())
 mongoose.connect('mongodb://127.0.0.1:27017/naya-studio')
 
 app.post('/api/signup', async (req, res) => {
-    console.log(req.body)
     try {
         const user = await User.create({
             firstname: req.body.firstname,
@@ -45,15 +44,14 @@ app.post('/api/login', async (req, res) => {
     }
 })
 
-app.get('/api/Canvas', async (req, res) => {
+app.get('/api/canvas', async (req, res) => {
     const token = req.headers['x-access-token']
     try {
         const decoded = jwt.verify(token, 'ioIUj76KJ@hvu6')
-
         const email = decoded.email
         const user = await User.findOne({email : email})
 
-        return{ status: 'ok'}
+        res.json({ status: 'ok', firstname: user.firstname, lastname: user.lastname, email: user.email})
     } catch (error){
         console.log(error)
         res.json({status: 'error', error: 'invalid token'})
