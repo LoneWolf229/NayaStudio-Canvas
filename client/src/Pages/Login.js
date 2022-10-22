@@ -60,7 +60,7 @@ function App() {
           <br/><br/>
           <button type='submit' value = 'Login'>Log in</button>
           <br/><br/>
-          <a>Don't have an account?</a> <a className='a-link' href="/signup">Sign up</a>
+          <p>Don't have an account? <a className='a-link' href="/signup">Sign up</a></p>
           <p>or</p>
         </form>
       </div>
