@@ -1,10 +1,39 @@
-import React, {useRef} from "react";
-import {useEffect} from 'react'
+import React, {useRef, useState, useEffect} from "react";
 import CanvasDraw from "react-canvas-draw";
-import jwtDecode from 'jwt-decode'
+import jwtDecode from 'jwt-decode';
 
+import StickyBox from "react-sticky-box";
+import useCollapse from 'react-collapsed';
+
+import './style/Canvas.css'
 
 const Canvas = () => {
+    const[totalsketchcount, setTotalSketchCount] = useState(0);
+    const[currentsketchname, setCurrentSketchName] = useState("Untitled");
+
+    async function populatePanels(){
+        const req = await fetch('http://localhost:1337/api/panels', {})
+        const data = await req.json()
+        console.log(data)
+        if(data.status === 'ok'){
+            let values = data.names
+            let list = document.getElementById('sketchlist')
+
+            list.innerHTML=''
+
+            values.forEach((item) => {
+                let li = document.createElement("li");
+                li.innerText=item;
+                list.appendChild(li);
+            });
+        }else{
+            let list = document.getElementById('sketchlist')
+            let li = document.createElement("li");
+            li.innerText="Error";
+            list.appendChild(li);
+
+        }
+    }
 
     async function populateCanvas(){
         const req = await fetch('http://localhost:1337/api/canvas', {
@@ -14,10 +43,7 @@ const Canvas = () => {
         })
         const data = await req.json()
         if (data.status === 'ok') {
-            const firstname = data.firstname
-            const lastname = data.lastname
-            //const email = data.email
-            document.getElementById('test').innerHTML = firstname+lastname
+            setTotalSketchCount(data.totalsketchcount)
         } else {
             alert('Authentication Error')
             window.location.href('/')
@@ -35,64 +61,120 @@ const Canvas = () => {
                 window.location.href =  '/login'
             } else{
                 populateCanvas()
+                populatePanels()
             }
-
         }
     }, [])
 
     const screencanvas1 = useRef('CanvasDraw')
-    const screencanvas2 = useRef('CanvasDraw')
 
-    var variable = ""
-
-    const handleSave= (event) => {
+    async function handleSave(event){
         event.preventDefault()
-        variable = screencanvas1.current.getSaveData();
-        console.log(variable);
+        const sketch = screencanvas1.current.getSaveData();
+        const response = await fetch('http://localhost:1337/api/savecanvas',{
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                
+                sketchstring: sketch,
+                sketchname: "Sketch "+(totalsketchcount+1).toString(),
+            })
+        })
+        const data = await response.json()
+        console.log(data)
+        if(data.status === 'ok'){
+            alert('Saved to DB')
+            setTotalSketchCount(totalsketchcount+1);
+            currentsketchname = "Sketch "+(totalsketchcount).toString();
+        }else{
+            alert('Unable to save')
+        }
     }
 
     const handleLoad= (event) => {
         event.preventDefault()
-        screencanvas2.current.loadSaveData(variable);
-        //console.log(data);
+        //screencanvas1.current.loadSaveData(variable);
+    }
+
+    const handleNew= (event) =>{
+        event.preventDefault()
+        currentsketchname = "Untitled"
+
+    }
+
+    function Section(props) {
+        const config = {
+            defaultExpanded: props.defaultExpanded || false,
+            collapsedHeight: props.collapsedHeight || 0
+        };
+        const { getCollapseProps, getToggleProps, isExpanded } = useCollapse(config);
+    return (
+        <div className="collapsible">
+            <div className="header" {...getToggleProps()}>
+                <div className="title">{props.title}</div>
+                <div className="icon">
+                    <i className={'fas fa-chevron-circle-' + (isExpanded ? 'up' : 'down')}></i>
+                </div>
+            </div>
+            <div {...getCollapseProps()}>
+                <div className="content">
+                    {props.children}
+                </div>
+            </div>
+        </div>
+        );
     }
     
     return(
         <div>
-            <p id="test"> </p>
+            <StickyBox><header id = "headid" > Sketching Application</header></StickyBox>
+                <div>
+                <p id= 'pheader'>
+                    username
+                </p>
+                </div>
+            
+            <div style={{display: "flex", alignItems: "flex-start"}}>
+                <StickyBox>
+                    <div>
+                        <CanvasDraw 
+                            canvasHeight={500}
+                            canvasWidth={1050}
+                            brushRadius = {1}
+                            brushColor = {"#" + Math.floor(Math.random() * 16777215).toString(16)}
+                            hideGrid={true}
+                            ref={screencanvas1}
+                            style={ { border: '2px solid', borderRadius:'4px'} }
+                        />
+                        <br/>
+                        <div>
+                            <form>
+                                <button onClick={handleSave}>Save</button>
 
-            <form>
-            <button onClick={handleSave}>Save</button>
-            <br/>
-            <button onClick={handleLoad}>Load</button>
-            </form>
+                                <button onClick={handleLoad}>Load</button>
 
-            <CanvasDraw 
-            canvasHeight={300}
-            canvasWidth={300}
-            brushRadius = {1}
-            brushColor = {"#" + Math.floor(Math.random() * 16777215).toString(16)}
-            hideGrid={true}
-            ref={screencanvas1}
-            style={ { border: '1px solid' } }
-            />
-            <br/><br/>
-            <CanvasDraw 
-            canvasHeight={300}
-            canvasWidth={300}
-            brushRadius = {1}
-            brushColor = {"#" + Math.floor(Math.random() * 16777215).toString(16)}
-            hideGrid={true}
-            ref={screencanvas2}
-            disabled={true}
-            style={ { border: '1px solid' } }
-            />
-
+                                <button onClick={handleNew}>New</button>
+                            </form>
+                        </div>
+                    </div>
+                </StickyBox>
+                <StickyBox>
+                    <div style={{height: 475, width:450, padding:"10px"}}>
+                        <Section title="SKETCHES" defaultExpanded="false">
+                            <ul id='sketchlist'>
+                            </ul>
+                        </Section>
+                        <Section title="USERS" defaultExpanded="false">
+                            <ul id='userlist'>
+                            </ul>
+                        </Section>
+                    </div>
+                </StickyBox>
+            </div>
+ 
         </div>
-
-        
-    )
-        
-}
+        )}
 
 export default Canvas
