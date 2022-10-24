@@ -8,7 +8,6 @@ import useCollapse from 'react-collapsed';
 import './style/Canvas.css'
 
 const Canvas = () => {
-    const[totalsketchcount, setTotalSketchCount] = useState(0);
     sessionStorage.setItem('currentsketchname',"Untitled");
 
     async function populatePanels(){
@@ -43,7 +42,8 @@ const Canvas = () => {
         })
         const data = await req.json()
         if (data.status === 'ok') {
-            sessionStorage.setItem('totalsketchcount', data.totalsketchcount)
+            sessionStorage.setItem('totalsketchcount', parseInt(data.totalsketchcount))
+            console.log(sessionStorage.getItem('totalsketchcount'))
         } else {
             alert('Authentication Error')
             window.location.href='/'
@@ -70,6 +70,19 @@ const Canvas = () => {
     async function handleSave(event){
         event.preventDefault()
         const sketch = screencanvas1.current.getSaveData();
+        let sketchname = ''
+        let sketchtype = ''
+        let  id = parseInt(sessionStorage.getItem('totalsketchcount'))
+
+        if(sessionStorage.getItem('currentsketchname') === 'Untitled'){
+            sketchname = "Sketch "+(id+1).toString()
+            sketchtype = 'new'
+
+        }else{
+            sketchname = sessionStorage.getItem('currentsketchname')
+            sketchtype = 'existing'
+        }
+
         const response = await fetch('http://localhost:1337/api/savecanvas',{
             method: 'POST',
             headers: {
@@ -78,15 +91,20 @@ const Canvas = () => {
             body: JSON.stringify({
                 
                 sketchstring: sketch,
-                sketchname: "Sketch "+(totalsketchcount+1).toString(),
+                sketchname: sketchname,
+                sketchtype: sketchtype,
+                email: sessionStorage.getItem('email') 
             })
         })
         const data = await response.json()
-        console.log(data)
+
         if(data.status === 'ok'){
             alert('Saved to DB')
-            setTotalSketchCount(totalsketchcount+1);
-            currentsketchname = "Sketch "+(totalsketchcount).toString();
+            if(sketchtype === 'new'){
+                sessionStorage.setItem('totalsketchcount', parseInt(sessionStorage.getItem('totalsketchcount'))+1)
+                sessionStorage.setItem('currentsketchname', sketchname)
+            }
+
         }else{
             alert('Unable to save')
         }
@@ -99,8 +117,11 @@ const Canvas = () => {
 
     const handleNew= (event) =>{
         event.preventDefault()
-        currentsketchname = "Untitled"
 
+        alert('New canvas?')
+        screencanvas1.current.eraseAll();
+        sessionStorage.setItem('currentsketchname', 'Untitled')
+        
     }
 
     function Section(props) {

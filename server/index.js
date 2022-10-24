@@ -21,11 +21,12 @@ app.post('/api/signup', async (req, res) => {
             lastname: req.body.lastname,
             email: req.body.email,
             password: req.body.password,
+            brushColor: req.body.brushColor
         })
-        res.json({status : 'ok'})
+        res.json({status : 'ok', from:'signup'})
     } catch (error) {
         console.log(error)
-        res.json({ status : 'error', error: 'Duplicate email' })
+        res.json({ status : 'error', error: 'Duplicate email', from:'signup' })
     }
 })
 
@@ -58,15 +59,12 @@ app.get('/api/auth', async (req, res) => {
         const email = decoded.email
         const user = await User.findOne({email : email})
         let sketchcount = 0
-        Sketch.count({}, function(err, count){
-            if(err){
-                console.log(err)
-            }else{
-                sketchcount=count
-            }
+        let k = await Sketch.count({}, function(err, count){
+            sketchcount=count
         });
 
         res.json({ status: 'ok', totalsketchcount: parseInt(sketchcount), from:'auth'})
+        console.log('Sketch', sketchcount)
     } catch (error){
         console.log(error)
         res.json({status: 'error', error: 'invalid token',  from:'auth'})
@@ -76,15 +74,30 @@ app.get('/api/auth', async (req, res) => {
 
 //Post request to store sketch to DB
 app.post('/api/savecanvas', async (req, res) => {
-    try{
-        const sketch = Sketch.create({
-            sketchstring: req.body.sketchstring,
-            sketchname: req.body.sketchname,
-        });
-        res.json({status: 'ok'})
-    }catch (error) {
-        console.log(error)
-        res.json({ status : 'error', error: 'Unable to save to DB' })
+
+    if(req.body.sketchtype ==='new')
+    {
+        try{
+            await Sketch.create({
+                sketchstring: req.body.sketchstring,
+                sketchname: req.body.sketchname,
+            });
+            let email = req.body.email
+            await Sketch.updateOne(
+                { sketchstring: req.body.sketchstring },
+                { $addToSet: { userlist: email}  });
+            res.json({status: 'ok', from:'savecanvas'})
+            console.log('Saved')
+        }catch (error) {
+            console.log(error)
+            res.json({ status : 'error', error: 'Unable to save to DB', from:'savecanvas' })
+        }
+    }else{
+        let email = req.body.email
+        await Sketch.findOneAndUpdate(
+            {sketchname:req.body.sketchname},
+            { $addToSet: { userlist: email} });
+            res.json({status: 'ok', from:'savecanvas'})
     }
 
 })
@@ -96,11 +109,10 @@ app.get('/api/panels', async (req, res) =>{
         for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
             outgoing.push(doc.sketchname)
           }
-          console.log(outgoing)
-        res.json({status:'ok', names: outgoing})
+        res.json({status:'ok', names: outgoing, from:'panels'})
         } catch (error) {
             console.log(error)
-            res.json({ status : 'error', error: 'Unable to save to DB' })
+            res.json({ status : 'error', error: 'Unable to save to DB' , from:'panels'})
         }
 })
 
