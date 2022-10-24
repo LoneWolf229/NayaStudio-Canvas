@@ -146,14 +146,24 @@ const Canvas = () => {
 
     async function handleLoad (event) {
         event.preventDefault()
+        let sname = loadsketchname
         //loadsketchname
-        const res = await fetch('http://localhost:1337/api/loadcanvas', {sketchname: loadsketchname})
-        const data = res.json()
+        const res = await fetch('http://localhost:1337/api/loadcanvas', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                sketchname: sname
+            })
+            
+        })
+        const data = await res.json()
         console.log(data)
         if(data.status === 'ok'){
             alert('New sketch loading!')
-            screencanvas1.current.loadSaveData(data.sketch);
-            sessionStorage.setItem('currentsketchname',data.sketchname);
+            screencanvas1.current.loadSaveData(data.sketch.sketchstring);
+            sessionStorage.setItem('currentsketchname',data.sketch.sketchname);
         }else{
             alert('Sketch does not exist')
         }

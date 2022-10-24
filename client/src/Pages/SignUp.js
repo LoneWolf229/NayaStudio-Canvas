@@ -11,7 +11,7 @@ function App() {
   async function signUp(event){
     event.preventDefault()
 
-    let brushColor = "#" + Math.floor(Math.random() * 16777215).toString(16)
+    let brushcolor = "#" + Math.floor(Math.random() * 16777215).toString(16)
 
     const response = await fetch ('http://localhost:1337/api/signup', {
       method: 'POST',
@@ -23,7 +23,7 @@ function App() {
         lastname,
         email,
         password,
-        brushColor
+        brushcolor
       }),
     })
 

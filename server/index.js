@@ -21,7 +21,7 @@ app.post('/api/signup', async (req, res) => {
             lastname: req.body.lastname,
             email: req.body.email,
             password: req.body.password,
-            brushColor: req.body.brushColor
+            brushcolor: req.body.brushcolor
         })
         res.json({status : 'ok', from:'signup'})
     } catch (error) {
@@ -119,19 +119,24 @@ app.post('/api/savecanvas', async (req, res) => {
 
 })
 
-app.get('/api/loadcanvas', async (req, res) =>{
+app.post('/api/loadcanvas', async (req, res) =>{
     try {
         let outgoing = ''
-        console.log(req.sketchname)
         await Sketch.findOne({
-            sketchname: req.sketchname,
+            sketchname: req.body.sketchname},
             function(err, sketch) {
-                console.log(sketch)
-                outgoing = sketch
+                if(err)
+                {
+                    console.log(err)
+                }else{
+                    //console.log(sketch.sketchstring)
+                    outgoing = sketch
+                }
+                
             }
-        })
+        )
         
-        res.json({status:'ok', names: outgoing, from:'loadcanvas'})
+        res.json({status:'ok', sketch: outgoing, from:'loadcanvas'})
         } catch (error) {
             console.log(error)
             res.json({ status : 'error', error: 'Unable to load from DB' , from:'loadcanvas'})
