@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from "react";
+import React, {useRef, useEffect, useState} from "react";
 import CanvasDraw from "react-canvas-draw";
 import jwtDecode from 'jwt-decode';
 
@@ -9,6 +9,8 @@ import './style/Canvas.css'
 
 const Canvas = () => {
     sessionStorage.setItem('currentsketchname',"Untitled");
+
+    const [loadsketchname, setLoadSketchName] = useState('')
 
     async function populateUserPanels(){
         const req = await fetch('http://localhost:1337/api/userlist', {
@@ -71,8 +73,9 @@ const Canvas = () => {
         if (data.status === 'ok') {
             sessionStorage.setItem('totalsketchcount', parseInt(data.totalsketchcount))
             console.log('count '+sessionStorage.getItem('totalsketchcount'))
-            document.getElementById('pheader').innerHTML = sessionStorage.getItem('currentsketchname') 
-            document.getElementById('headid').innerHTML = sessionStorage.getItem('firstname') +' '+ sessionStorage.getItem('lastname')
+            document.getElementById('headid').innerHTML = 
+                sessionStorage.getItem('firstname') +' '+ 
+                sessionStorage.getItem('lastname')  +' '+  "Sketch : "+ sessionStorage.getItem('currentsketchname');
         } else {
             alert('Authentication Error')
             window.location.href='/'
@@ -143,6 +146,19 @@ const Canvas = () => {
 
     async function handleLoad (event) {
         event.preventDefault()
+        //loadsketchname
+        const res = await fetch('http://localhost:1337/api/loadcanvas', {sketchname: loadsketchname})
+        const data = res.json()
+        console.log(data)
+        if(data.status === 'ok'){
+            alert('New sketch loading!')
+            screencanvas1.current.loadSaveData(data.sketch);
+            sessionStorage.setItem('currentsketchname',data.sketchname);
+        }else{
+            alert('Sketch does not exist')
+        }
+
+
         //screencanvas1.current.loadSaveData(variable);
     }
 
@@ -178,19 +194,15 @@ const Canvas = () => {
     
     return(
         <div>
-            <StickyBox><header id = "headid" > Sketching Application</header></StickyBox>
-                <div>
-                <p id= 'pheader'>
-                    username
-                </p>
-                </div>
+            <StickyBox><header id = "headid" > </header></StickyBox>
+            <p></p>
             
             <div style={{display: "flex", alignItems: "flex-start"}}>
                 <StickyBox>
                     <div>
                         <CanvasDraw 
                             canvasHeight={500}
-                            canvasWidth={1050}
+                            canvasWidth={1000}
                             brushRadius = {1}
                             brushColor = {"#" + Math.floor(Math.random() * 16777215).toString(16)}
                             hideGrid={true}
@@ -200,10 +212,15 @@ const Canvas = () => {
                         <br/>
                         <div>
                             <form>
-                                <button onClick={handleSave}>Save</button>
+                            <input className='input-box' value  = {loadsketchname}  
+                            onChange = {(e) => setLoadSketchName(e.target.value)}
+                            placeholder = "Enter Sketch Name from list to load"   />
 
                                 <button onClick={handleLoad}>Load</button>
 
+                                <br/><br/>
+                                
+                                <button onClick={handleSave}>Save</button>
                                 <button onClick={handleNew}>New</button>
                             </form>
                         </div>

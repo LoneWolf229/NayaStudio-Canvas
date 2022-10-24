@@ -119,6 +119,25 @@ app.post('/api/savecanvas', async (req, res) => {
 
 })
 
+app.get('/api/loadcanvas', async (req, res) =>{
+    try {
+        let outgoing = ''
+        console.log(req.sketchname)
+        await Sketch.findOne({
+            sketchname: req.sketchname,
+            function(err, sketch) {
+                console.log(sketch)
+                outgoing = sketch
+            }
+        })
+        
+        res.json({status:'ok', names: outgoing, from:'loadcanvas'})
+        } catch (error) {
+            console.log(error)
+            res.json({ status : 'error', error: 'Unable to load from DB' , from:'loadcanvas'})
+        }
+})
+
 app.get('/api/panels', async (req, res) =>{
     try {
         var outgoing = []
