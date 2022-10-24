@@ -43,27 +43,33 @@ app.post('/api/login', async (req, res) => {
             email: user.email,
         }, 'ioIUj76KJ@hvu6')
 
-        return res.json({ status: 'ok', user: token})
+        return res.json({ status: 'ok', user: token,firstname:user.firstname, lastname:user.lastname, email:user.email , from:'login'})
     } else {
-        return res.json({status: 'ok', user: false})
+        return res.json({status: 'ok', user: false, from:'login'})
     }
 })
 
 
 //Get request from Canvas.js ------ response - user detail
-app.get('/api/canvas', async (req, res) => {
+app.get('/api/auth', async (req, res) => {
     const token = req.headers['x-access-token']
     try {
         const decoded = jwt.verify(token, 'ioIUj76KJ@hvu6')
         const email = decoded.email
         const user = await User.findOne({email : email})
-        
-        const query = await Sketch.count();
+        let sketchcount = 0
+        Sketch.count({}, function(err, count){
+            if(err){
+                console.log(err)
+            }else{
+                sketchcount=count
+            }
+        });
 
-        res.json({ status: 'ok', firstname: user.firstname, lastname: user.lastname, email: user.email, totalsketchcount: query})
+        res.json({ status: 'ok', totalsketchcount: parseInt(sketchcount), from:'auth'})
     } catch (error){
         console.log(error)
-        res.json({status: 'error', error: 'invalid token'})
+        res.json({status: 'error', error: 'invalid token',  from:'auth'})
     } 
 })
 

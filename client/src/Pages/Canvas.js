@@ -9,7 +9,7 @@ import './style/Canvas.css'
 
 const Canvas = () => {
     const[totalsketchcount, setTotalSketchCount] = useState(0);
-    const[currentsketchname, setCurrentSketchName] = useState("Untitled");
+    sessionStorage.setItem('currentsketchname',"Untitled");
 
     async function populatePanels(){
         const req = await fetch('http://localhost:1337/api/panels', {})
@@ -35,32 +35,31 @@ const Canvas = () => {
         }
     }
 
-    async function populateCanvas(){
-        const req = await fetch('http://localhost:1337/api/canvas', {
+    async function auth(){
+        const req = await fetch('http://localhost:1337/api/auth', {
             headers: {
-                'x-access-token': localStorage.getItem('token'),
+                'x-access-token': sessionStorage.getItem('token'),
             },
         })
         const data = await req.json()
         if (data.status === 'ok') {
-            setTotalSketchCount(data.totalsketchcount)
+            sessionStorage.setItem('totalsketchcount', data.totalsketchcount)
         } else {
             alert('Authentication Error')
-            window.location.href('/')
+            window.location.href='/'
         }
     }
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
 
         if(token){
             const user = jwtDecode(token)
             console.log(user)
             if (!user) {
-                localStorage.removeItem('token')
-                window.location.href =  '/login'
+                window.location.href =  '/'
             } else{
-                populateCanvas()
+                auth()
                 populatePanels()
             }
         }

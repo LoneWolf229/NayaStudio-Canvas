@@ -23,7 +23,11 @@ function App() {
     const data = await response.json()
 
     if(data.user){
-      localStorage.setItem('token', data.user)
+      sessionStorage.setItem('token', data.user)
+      sessionStorage.setItem('firstname', data.firstname)
+      sessionStorage.setItem('lastname', data.lastname)
+      sessionStorage.setItem('email', data.email)
+
       alert('Login Successful')
       window.location.href =  '/canvas'
     }else{
