@@ -58,12 +58,19 @@ app.get('/api/auth', async (req, res) => {
         const decoded = jwt.verify(token, 'ioIUj76KJ@hvu6')
         const email = decoded.email
         const user = await User.findOne({email : email})
-        let sketchcount = 0
+        let sketchcount = -1;
         let k = await Sketch.count({}, function(err, count){
             sketchcount=count
         });
 
+        if(sketchcount === -1){
+            await Sketch.count({}, function(err, count){
+                sketchcount=count
+            });
+        }
+
         res.json({ status: 'ok', totalsketchcount: parseInt(sketchcount), from:'auth'})
+
         console.log('Sketch', sketchcount)
     } catch (error){
         console.log(error)

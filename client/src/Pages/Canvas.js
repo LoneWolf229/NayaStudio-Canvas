@@ -43,7 +43,9 @@ const Canvas = () => {
         const data = await req.json()
         if (data.status === 'ok') {
             sessionStorage.setItem('totalsketchcount', parseInt(data.totalsketchcount))
-            console.log(sessionStorage.getItem('totalsketchcount'))
+            console.log('count '+sessionStorage.getItem('totalsketchcount'))
+            document.getElementById('pheader').innerHTML = sessionStorage.getItem('currentsketchname') 
+            document.getElementById('headid').innerHTML = sessionStorage.getItem('firstname') +' '+ sessionStorage.getItem('lastname')
         } else {
             alert('Authentication Error')
             window.location.href='/'
@@ -99,11 +101,12 @@ const Canvas = () => {
         const data = await response.json()
 
         if(data.status === 'ok'){
-            alert('Saved to DB')
             if(sketchtype === 'new'){
                 sessionStorage.setItem('totalsketchcount', parseInt(sessionStorage.getItem('totalsketchcount'))+1)
                 sessionStorage.setItem('currentsketchname', sketchname)
             }
+            
+            alert('Saved to DB')
 
         }else{
             alert('Unable to save')
@@ -134,9 +137,7 @@ const Canvas = () => {
         <div className="collapsible">
             <div className="header" {...getToggleProps()}>
                 <div className="title">{props.title}</div>
-                <div className="icon">
-                    <i className={'fas fa-chevron-circle-' + (isExpanded ? 'up' : 'down')}></i>
-                </div>
+
             </div>
             <div {...getCollapseProps()}>
                 <div className="content">
