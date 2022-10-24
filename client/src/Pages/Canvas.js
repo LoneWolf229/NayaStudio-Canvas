@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect} from "react";
+import React, {useRef, useEffect} from "react";
 import CanvasDraw from "react-canvas-draw";
 import jwtDecode from 'jwt-decode';
 
@@ -10,10 +10,37 @@ import './style/Canvas.css'
 const Canvas = () => {
     sessionStorage.setItem('currentsketchname',"Untitled");
 
-    async function populatePanels(){
-        const req = await fetch('http://localhost:1337/api/panels', {})
+    async function populateUserPanels(){
+        const req = await fetch('http://localhost:1337/api/userlist', {
+            sketchname: sessionStorage.getItem('currentsketchname')
+        })
         const data = await req.json()
         console.log(data)
+
+        if(data.status === 'ok'){
+            let values = data.names
+            let list = document.getElementById('userlist')
+
+            list.innerHTML=''
+
+            values.forEach((item) => {
+                let li = document.createElement("li");
+                li.innerText=item;
+                list.appendChild(li);
+            });
+        }else{
+            let list = document.getElementById('userlist')
+            let li = document.createElement("li");
+            li.innerText="Error";
+            list.appendChild(li);
+
+        }
+    }
+
+    async function populateSketchPanels(){
+        const req = await fetch('http://localhost:1337/api/panels', {})
+        const data = await req.json()
+
         if(data.status === 'ok'){
             let values = data.names
             let list = document.getElementById('sketchlist')
@@ -62,7 +89,8 @@ const Canvas = () => {
                 window.location.href =  '/'
             } else{
                 auth()
-                populatePanels()
+                populateSketchPanels()
+                populateUserPanels()
             }
         }
     }, [])
@@ -113,12 +141,12 @@ const Canvas = () => {
         }
     }
 
-    const handleLoad= (event) => {
+    async function handleLoad (event) {
         event.preventDefault()
         //screencanvas1.current.loadSaveData(variable);
     }
 
-    const handleNew= (event) =>{
+    async function handleNew (event){
         event.preventDefault()
 
         alert('New canvas?')

@@ -7,7 +7,7 @@ const User = new mongoose.Schema(
         email: {type: String, required: true, unique: true},
         password: {type: String, required: true},
         isloggedin: {type: Boolean},
-        brushColor: {type: String, required: true}
+        brushcolor: {type: String, required: true}
     },
     {collection: 'user-data'}
 )

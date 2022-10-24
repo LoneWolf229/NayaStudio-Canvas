@@ -27,6 +27,7 @@ function App() {
       sessionStorage.setItem('firstname', data.firstname)
       sessionStorage.setItem('lastname', data.lastname)
       sessionStorage.setItem('email', data.email)
+      sessionStorage.setItem('brushcolor', data.brushcolor)
 
       alert('Login Successful')
       window.location.href =  '/canvas'

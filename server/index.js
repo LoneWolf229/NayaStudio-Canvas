@@ -44,7 +44,13 @@ app.post('/api/login', async (req, res) => {
             email: user.email,
         }, 'ioIUj76KJ@hvu6')
 
-        return res.json({ status: 'ok', user: token,firstname:user.firstname, lastname:user.lastname, email:user.email , from:'login'})
+        return res.json({ 
+            status: 'ok', user: token,
+            firstname:user.firstname, 
+            lastname:user.lastname, 
+            email:user.email,
+            brushcolor:user.brushcolor,
+            from:'login'})
     } else {
         return res.json({status: 'ok', user: false, from:'login'})
     }
@@ -64,10 +70,14 @@ app.get('/api/auth', async (req, res) => {
         });
 
         if(sketchcount === -1){
-            await Sketch.count({}, function(err, count){
-                sketchcount=count
-            });
+        await Sketch.count({}, function(err, count){
+            sketchcount=count
+        });
         }
+        if(sketchcount === -1){
+        await Sketch.count({}, function(err, count){
+        sketchcount=count
+        });}
 
         res.json({ status: 'ok', totalsketchcount: parseInt(sketchcount), from:'auth'})
 
@@ -120,6 +130,23 @@ app.get('/api/panels', async (req, res) =>{
         } catch (error) {
             console.log(error)
             res.json({ status : 'error', error: 'Unable to save to DB' , from:'panels'})
+        }
+})
+
+app.get('/api/userlist', async (req, res) =>{
+    try {
+        var outgoing = []
+
+        let sketchname = req.sketchname
+
+        let sketch = Sketch.findOne({sketchname : sketchname})
+
+        let users = sketch.userlist
+
+        res.json({status:'ok', names: users, from:'userlist'})
+        } catch (error) {
+            console.log(error)
+            res.json({ status : 'error', error: 'Unable to save to DB' , from:'userlist'})
         }
 })
 
