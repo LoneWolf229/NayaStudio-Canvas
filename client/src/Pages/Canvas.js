@@ -7,15 +7,24 @@ import useCollapse from 'react-collapsed';
 
 import './style/Canvas.css'
 
-const Canvas = () => {
+function Canvas() {
     sessionStorage.setItem('currentsketchname',"Untitled");
 
     const [loadsketchname, setLoadSketchName] = useState('')
+    const [currentsketchname,setCurrentSketchName] = useState("Untitled")
 
     async function populateUserPanels(){
+        console.log("trial: "+sessionStorage.getItem('currentsketchname'))
         const req = await fetch('http://localhost:1337/api/userlist', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify({  
             sketchname: sessionStorage.getItem('currentsketchname')
+            })
         })
+
         const data = await req.json()
         console.log(data)
 
@@ -32,8 +41,9 @@ const Canvas = () => {
             });
         }else{
             let list = document.getElementById('userlist')
+            list.innerHTML=''
             let li = document.createElement("li");
-            li.innerText="Error";
+            li.innerText="No User found";
             list.appendChild(li);
 
         }
@@ -72,10 +82,8 @@ const Canvas = () => {
         const data = await req.json()
         if (data.status === 'ok') {
             sessionStorage.setItem('totalsketchcount', parseInt(data.totalsketchcount))
-            console.log('count '+sessionStorage.getItem('totalsketchcount'))
-            document.getElementById('headid').innerHTML = 
-                sessionStorage.getItem('firstname') +' '+ 
-                sessionStorage.getItem('lastname')  +' '+  "Sketch : "+ sessionStorage.getItem('currentsketchname');
+            setCurrentSketchName( sessionStorage.getItem('currentsketchname'))
+
         } else {
             alert('Authentication Error')
             window.location.href='/'
@@ -97,6 +105,13 @@ const Canvas = () => {
             }
         }
     }, [])
+
+    useEffect(()=>{
+        document.getElementById('headid').innerHTML = ( "SketchName : "+ currentsketchname);
+        populateSketchPanels()
+        document.getElementById('userdisplay').innerHTML = ("User : "+sessionStorage.getItem('firstname')+' '+sessionStorage.getItem('lastname') )
+        populateSketchPanels()
+    },[currentsketchname])
 
     const screencanvas1 = useRef('CanvasDraw')
 
@@ -135,6 +150,7 @@ const Canvas = () => {
             if(sketchtype === 'new'){
                 sessionStorage.setItem('totalsketchcount', parseInt(sessionStorage.getItem('totalsketchcount'))+1)
                 sessionStorage.setItem('currentsketchname', sketchname)
+                setCurrentSketchName(sessionStorage.getItem('currentsketchname'))
             }
             
             alert('Saved to DB')
@@ -147,7 +163,6 @@ const Canvas = () => {
     async function handleLoad (event) {
         event.preventDefault()
         let sname = loadsketchname
-        //loadsketchname
         const res = await fetch('http://localhost:1337/api/loadcanvas', {
             method: 'POST',
             headers: {
@@ -159,13 +174,16 @@ const Canvas = () => {
             
         })
         const data = await res.json()
-        console.log(data)
         if(data.status === 'ok'){
             alert('New sketch loading!')
             screencanvas1.current.loadSaveData(data.sketch.sketchstring);
             sessionStorage.setItem('currentsketchname',data.sketch.sketchname);
-        }else{
-            alert('Sketch does not exist')
+            setCurrentSketchName(data.sketch.sketchname )
+            console.log("Sketch on screen: " + data.sketch.sketchname)
+            populateUserPanels()
+        }else if(data.status === 'No Data'){
+            alert('Sketch does not exist')            
+            populateUserPanels()
         }
 
 
@@ -178,6 +196,7 @@ const Canvas = () => {
         alert('New canvas?')
         screencanvas1.current.eraseAll();
         sessionStorage.setItem('currentsketchname', 'Untitled')
+        setCurrentSketchName(sessionStorage.getItem('currentsketchname'))
         
     }
 
@@ -205,8 +224,7 @@ const Canvas = () => {
     return(
         <div>
             <StickyBox><header id = "headid" > </header></StickyBox>
-            <p></p>
-            
+            <p id="userdisplay" ></p>
             <div style={{display: "flex", alignItems: "flex-start"}}>
                 <StickyBox>
                     <div>
@@ -214,7 +232,7 @@ const Canvas = () => {
                             canvasHeight={500}
                             canvasWidth={1000}
                             brushRadius = {1}
-                            brushColor = {"#" + Math.floor(Math.random() * 16777215).toString(16)}
+                            brushColor = {sessionStorage.getItem('brushcolor')}
                             hideGrid={true}
                             ref={screencanvas1}
                             style={ { border: '2px solid', borderRadius:'4px'} }

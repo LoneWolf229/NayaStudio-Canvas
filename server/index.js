@@ -81,7 +81,6 @@ app.get('/api/auth', async (req, res) => {
 
         res.json({ status: 'ok', totalsketchcount: parseInt(sketchcount), from:'auth'})
 
-        console.log('Sketch', sketchcount)
     } catch (error){
         console.log(error)
         res.json({status: 'error', error: 'invalid token',  from:'auth'})
@@ -113,7 +112,7 @@ app.post('/api/savecanvas', async (req, res) => {
         let email = req.body.email
         await Sketch.findOneAndUpdate(
             {sketchname:req.body.sketchname},
-            { $addToSet: { userlist: email} });
+            { sketchstring: req.body.sketchstring, $addToSet: { userlist: email} });
             res.json({status: 'ok', from:'savecanvas'})
     }
 
@@ -122,21 +121,16 @@ app.post('/api/savecanvas', async (req, res) => {
 app.post('/api/loadcanvas', async (req, res) =>{
     try {
         let outgoing = ''
-        await Sketch.findOne({
-            sketchname: req.body.sketchname},
-            function(err, sketch) {
-                if(err)
-                {
-                    console.log(err)
-                }else{
-                    //console.log(sketch.sketchstring)
-                    outgoing = sketch
-                }
-                
-            }
-        )
+        let sketch = await Sketch.findOne({
+            sketchname: req.body.sketchname})
+        outgoing = sketch
+
+        if(outgoing === null){
+            res.json({status:'No Data', sketch: outgoing, from:'loadcanvas'})
+        }else{
+            res.json({status:'ok', sketch: outgoing, from:'loadcanvas'})
+        }
         
-        res.json({status:'ok', sketch: outgoing, from:'loadcanvas'})
         } catch (error) {
             console.log(error)
             res.json({ status : 'error', error: 'Unable to load from DB' , from:'loadcanvas'})
@@ -157,20 +151,17 @@ app.get('/api/panels', async (req, res) =>{
         }
 })
 
-app.get('/api/userlist', async (req, res) =>{
+app.post('/api/userlist', async (req, res) =>{
     try {
-        var outgoing = []
+        let sketchname = req.body.sketchname  
 
-        let sketchname = req.sketchname
-
-        let sketch = Sketch.findOne({sketchname : sketchname})
-
+        let sketch = await Sketch.findOne({sketchname : sketchname})
         let users = sketch.userlist
 
         res.json({status:'ok', names: users, from:'userlist'})
         } catch (error) {
             console.log(error)
-            res.json({ status : 'error', error: 'Unable to save to DB' , from:'userlist'})
+            res.json({ status : 'error', error: 'No Users found' , from:'userlist'})
         }
 })
 
