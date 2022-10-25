@@ -153,12 +153,20 @@ app.get('/api/panels', async (req, res) =>{
 
 app.post('/api/userlist', async (req, res) =>{
     try {
-        let sketchname = req.body.sketchname  
+        let sketchname = req.body.sketchname
 
         let sketch = await Sketch.findOne({sketchname : sketchname})
         let users = sketch.userlist
 
-        res.json({status:'ok', names: users, from:'userlist'})
+        var outgoing = []
+        for await (item of users){
+            let user = await User.findOne({email: item})
+            let output = user.firstname+ ' ' + user.lastname;
+            outgoing[outgoing.length] = output;
+            console.log(outgoing)
+        }     
+        console.log('OutsideLoop: ',outgoing)
+        res.json({status:'ok', names: outgoing, from:'userlist'})
         } catch (error) {
             console.log(error)
             res.json({ status : 'error', error: 'No Users found' , from:'userlist'})
