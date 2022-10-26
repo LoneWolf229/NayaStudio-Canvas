@@ -14,7 +14,6 @@ function Canvas() {
     const [currentsketchname,setCurrentSketchName] = useState("Untitled")
 
     async function populateUserPanels(){
-        console.log("trial: "+sessionStorage.getItem('currentsketchname'))
         const req = await fetch('http://localhost:1337/api/userlist', {
             method: 'POST',
             headers: {
