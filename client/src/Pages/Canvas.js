@@ -270,7 +270,7 @@ function Canvas() {
                 </StickyBox>
                 <StickyBox>
                     <div style={{height: 475, width:450, padding:"10px"}}>
-                        <Section title="SKETCHES" defaultExpanded="false">
+                        <Section title="SKETCHES" defaultExpanded="true" >
                             <ul id='sketchlist'>
                             </ul>
                         </Section>
