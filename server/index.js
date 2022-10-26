@@ -158,15 +158,18 @@ app.post('/api/userlist', async (req, res) =>{
         let sketch = await Sketch.findOne({sketchname : sketchname})
         let users = sketch.userlist
 
-        var outgoing = []
+        var outgoingusername = []
+        var outgoingusercolor = []
         for await (item of users){
             let user = await User.findOne({email: item})
             let output = user.firstname+ ' ' + user.lastname;
-            outgoing[outgoing.length] = output;
-            console.log(outgoing)
+            let usercolor = user.brushcolor
+            outgoingusername[outgoingusername.length] = output;
+            outgoingusercolor[outgoingusercolor.length] = usercolor;
         }     
-        console.log('OutsideLoop: ',outgoing)
-        res.json({status:'ok', names: outgoing, from:'userlist'})
+        console.log('OutsideLoop: names :',outgoingusername)
+        console.log('OutsideLoop: colors :',outgoingusercolor)
+        res.json({status:'ok', names: outgoingusername, colors: outgoingusercolor,from:'userlist'})
         } catch (error) {
             console.log(error)
             res.json({ status : 'error', error: 'No Users found' , from:'userlist'})

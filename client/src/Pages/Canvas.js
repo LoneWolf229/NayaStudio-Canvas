@@ -29,16 +29,19 @@ function Canvas() {
         console.log(data)
 
         if(data.status === 'ok'){
-            let values = data.names
+            let namevalues = data.names
+            let colorvalues = data.colors
             let list = document.getElementById('userlist')
 
             list.innerHTML=''
 
-            values.forEach((item) => {
+            for(let loop = 0; loop < namevalues.length; loop+=1){
                 let li = document.createElement("li");
-                li.innerText=item;
+                li.innerText=namevalues[loop];
+                li.style.color = colorvalues[loop]
+                //li.firstChild().style.color = colorvalues[loop]
                 list.appendChild(li);
-            });
+            };
         }else{
             let list = document.getElementById('userlist')
             list.innerHTML=''
@@ -92,6 +95,7 @@ function Canvas() {
 
     useEffect(() => {
         const token = sessionStorage.getItem('token')
+        console.log(token)
 
         if(token){
             const user = jwtDecode(token)
@@ -103,6 +107,9 @@ function Canvas() {
                 populateSketchPanels()
                 populateUserPanels()
             }
+        }else {
+            alert('User not logged in')
+            window.location.href='/'
         }
     }, [])
 
@@ -152,6 +159,7 @@ function Canvas() {
                 sessionStorage.setItem('currentsketchname', sketchname)
                 setCurrentSketchName(sessionStorage.getItem('currentsketchname'))
             }
+            populateUserPanels()
             
             alert('Saved to DB')
 
@@ -182,8 +190,11 @@ function Canvas() {
             console.log("Sketch on screen: " + data.sketch.sketchname)
             populateUserPanels()
         }else if(data.status === 'No Data'){
-            alert('Sketch does not exist')            
+            alert('Sketch does not exist')  
+
+            populateSketchPanels()
             populateUserPanels()
+            screencanvas1.current.eraseAll();
         }
 
 
@@ -195,6 +206,8 @@ function Canvas() {
 
         alert('New canvas?')
         screencanvas1.current.eraseAll();
+        populateSketchPanels()
+        populateUserPanels()
         sessionStorage.setItem('currentsketchname', 'Untitled')
         setCurrentSketchName(sessionStorage.getItem('currentsketchname'))
         
