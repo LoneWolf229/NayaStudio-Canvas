@@ -8,10 +8,10 @@ import useCollapse from 'react-collapsed';
 import './style/Canvas.css'
 
 function Canvas() {
-    sessionStorage.setItem('currentsketchname',"Untitled");
+    
 
     const [loadsketchname, setLoadSketchName] = useState('')
-    const [currentsketchname,setCurrentSketchName] = useState("Untitled")
+    const [currentsketchname,setCurrentSketchName] = useState()
 
     async function populateUserPanels(){
         const req = await fetch('http://localhost:1337/api/userlist', {
@@ -105,6 +105,7 @@ function Canvas() {
                 auth()
                 populateSketchPanels()
                 populateUserPanels()
+                sessionStorage.setItem('currentsketchname',"Untitled");
             }
         }else {
             alert('User not logged in')
@@ -130,6 +131,8 @@ function Canvas() {
 
         if(sessionStorage.getItem('currentsketchname') === 'Untitled'){
             sketchname = "Sketch "+(id+1).toString()
+            console.log("Inside Save: "+sessionStorage.getItem('currentsketchname'))
+            console.log("Inside Save: "+currentsketchname)
             sketchtype = 'new'
 
         }else{
@@ -185,12 +188,14 @@ function Canvas() {
             alert('New sketch loading!')
             screencanvas1.current.loadSaveData(data.sketch.sketchstring);
             sessionStorage.setItem('currentsketchname',data.sketch.sketchname);
-            setCurrentSketchName(data.sketch.sketchname )
-            console.log("Sketch on screen: " + data.sketch.sketchname)
+            setCurrentSketchName(sessionStorage.getItem('currentsketchname'))
+
+            console.log("Inside Load : ", sessionStorage.getItem('currentsketchname'))
+            console.log("Sketch on screen: " + currentsketchname)
             populateUserPanels()
         }else if(data.status === 'No Data'){
-            alert('Sketch does not exist')  
-
+            alert('Sketch does not exist')
+            console.log("Inside Load else: ", data.sketch.sketchname)
             populateSketchPanels()
             populateUserPanels()
             screencanvas1.current.eraseAll();
@@ -198,6 +203,7 @@ function Canvas() {
 
 
         //screencanvas1.current.loadSaveData(variable);
+        console.log("At End : " + sessionStorage.getItem('currentsketchname')) 
     }
     //final commit
 
@@ -206,11 +212,10 @@ function Canvas() {
 
         alert('New canvas?')
         screencanvas1.current.eraseAll();
-        populateSketchPanels()
-        populateUserPanels()
         sessionStorage.setItem('currentsketchname', 'Untitled')
         setCurrentSketchName(sessionStorage.getItem('currentsketchname'))
-        
+        populateSketchPanels()
+        populateUserPanels()        
     }
 
     function Section(props) {

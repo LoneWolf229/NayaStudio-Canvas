@@ -66,7 +66,6 @@ function App() {
           <button type='submit' value = 'Login'>Log in</button>
           <br/><br/>
           <p>Don't have an account? <a className='a-link' href="/signup">Sign up</a></p>
-          <p>or</p>
         </form>
       </div>
     </div>
